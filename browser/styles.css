@@ -1,0 +1,10 @@
+/*#remoteVideo {
+  filter: hue-rotate(90deg) saturate(100%) sepia(1);
+  -moz-filter: hue-rotate(90deg) saturate(100%) sepia(1);
+  -webkit-filter: hue-rotate(90deg) saturate(100%) sepia(1);
+}
+
+video {
+	display: inline-block;
+	width: 400px;
+}*/
