@@ -5,37 +5,32 @@
     <meta name="keywords" content="WebRTC, HTML5, JavaScript" />
     <meta name="description" content="WebRTC Reference App" />
     <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1">
-    <base target='_blank'>
+    <base href="/"/>
     <title>WebRTC client</title>
     <link rel="stylesheet" href="styles.css">
-
 </head>
 
-<body>
-    <h1>WebRTC codelab: step X</h1>
-    <p>
-        Room URL:
-        <br>
-        <code id="url">...</code>
-    </p>
-    <video class="camera" autoplay></video>
-    <div class="controls">
-        <canvas id="photo" style="width: 200px; height: 150px; border: 1px solid #ccc;"></canvas>
-        <p>
-            <button id="snap">snap</button>-then-
-            <button id="send">send</button>
-            <br> - or -
-            <br>
-            <button id="snapAndSend">snap & send</button>
-        </p>
-    </div>
-    <div class="incoming">
-        <h2>Incoming photos</h2>
-        <div id="trail"></div>
-    </div>
+<body ng-app="app">
+    <app-navbar></app-navbar>
+    <ui-view></ui-view>
+    
+    
+
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script>
+    <script src="https://code.jquery.com/jquery-2.2.3.js" integrity="sha256-laXWtGydpwqJ8JA+X9x2miwmaiKhn8tVmOVEigRNtP4=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.18/angular-ui-router.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
     <script src='socket.io/socket.io.js'></script>
     <script src='adapter.js'></script>
+    <script src='crypto.js'></script>
+    <script src="usermedia.js"></script>
+    <script src="peerconnection.js"></script>
+    <script src="helpers.js"></script>
     <script src="index.js"></script>
+
+    <script src="navbar/navbar.directive.js"></script>
+    <script src="main/main.controller.js"></script>
+    <script src="main/main.state.js"></script>
 </body>
 
 </html>

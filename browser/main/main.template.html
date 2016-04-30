@@ -1,0 +1,65 @@
+<div class="container">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Scorecard</h3>
+                </div>
+                <table class="table">
+                    <tr>
+                        <th>Name</th>
+                        <th>Score</th>
+                    </tr>
+                    <tr>
+                        <td>Bob</td>
+                        <td>500</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Guess the average</h3>
+                </div>
+                <div class="panel-body">
+                    In each round, players submit a number. The player who submitted the number closest to the average of all submitted numbers is the winner.
+                </div>
+                <div class="input-group input-group-lg insidePanel">
+                    <span class="input-group-addon" id="basic-addon1">Your guess</span>
+                    <input id="numberInput" type="text" class="form-control" placeholder="Enter a number" aria-describedby="sizing-addon1" ng-model="numberInput">
+                </div>
+                <div class="insidePanel">
+                    <button id="submitButton" type="button" class="btn btn-primary btn-lg center-block" ng-click="submitNumber()">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- <div class="row">
+    <div class="col-md-4">
+        <p>
+            Room URL:
+            <br>
+            <code id="url">...</code>
+        </p>
+        <div class="incoming">
+            <h2>Incoming photos</h2>
+            <div id="trail"></div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <video class="camera" autoplay></video>
+        <div class="controls">
+            <canvas id="photo" style="width: 200px; height: 150px; border: 1px solid #ccc;"></canvas>
+            <p>
+                <button id="snap">snap</button>-then-
+                <button id="send">send</button>
+                <br> - or -
+                <br>
+                <button id="snapAndSend">snap & send</button>
+            </p>
+        </div>
+    </div>
+</div> -->

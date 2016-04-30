@@ -8,3 +8,18 @@ video {
 	display: inline-block;
 	width: 400px;
 }*/
+
+body {
+	padding-top: 70px;
+	padding-bottom: 70px;
+}
+
+#submitButton {
+	border-radius: 50%;
+	height: 200px;
+	width: 200px;
+}
+
+.insidePanel {
+	padding: 5px;
+}
