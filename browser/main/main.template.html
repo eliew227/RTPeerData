@@ -1,7 +1,7 @@
 <div class="container">
     <div class="row">
         <div class="col-md-4">
-            <div class="panel panel-info">
+            <div class="panel panel-success">
                 <div class="panel-heading">
                     <h3 class="panel-title">Scorecard</h3>
                 </div>
@@ -16,11 +16,21 @@
                     </tr>
                 </table>
             </div>
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Logged in users</h3>
+                </div>
+                <table class="table">
+                    <tr ng-repeat="user in loggedInUsers">
+                        <td>{{user}}</td>
+                    </tr>
+                </table>
+            </div>            
         </div>
         <div class="col-md-8">
             <div class="panel panel-primary">
                 <div class="panel-heading">
-                    <h3 class="panel-title">Guess the average</h3>
+                    <h3 class="panel-title">{{myUsername}}, guess the average</h3>
                 </div>
                 <div class="panel-body">
                     In each round, players submit a number. The player who submitted the number closest to the average of all submitted numbers is the winner.

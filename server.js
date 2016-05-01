@@ -45,9 +45,9 @@ io.sockets.on('connection', function (socket){
 
     socket.on('message', function (message, socketId) {
         log('Client said:', message);
-        // for a real app, would be room only (not broadcast)
         if (socketId) io.to(socketId).emit('message', message, socket.id);
-        else socket.broadcast.emit('message', message);
+        else console.log('no target recipient set');
+        //socket.broadcast.emit('message', message);
     });
 
     socket.on('create or join', function (room) {
@@ -63,32 +63,15 @@ io.sockets.on('connection', function (socket){
         } else {
             socket.join(room);
             socket.emit('joined', room, socket.id);
+            socket.broadcast.to(room).emit('someone joined');
             io.sockets.in(room).emit('ready', socket.id, connectedSocketIds);
         } 
-        // else { // max two clients
-        //     socket.emit('full', room);
-        // }
-    });
 
-    // socket.on('ipaddr', function () {
-    //     var ifaces = os.networkInterfaces();
-    //     for (var dev in ifaces) {
-    //         ifaces[dev].forEach(function (details) {
-    //             if (details.family=='IPv4' && details.address != '127.0.0.1') {
-    //                 socket.emit('ipaddr', details.address);
-    //             }
-    //       });
-    //     }
-    // });
+    });
 
 });
 
-
-
-
-// app.use(express.static(__dirname + '/node_modules'));
 app.use(express.static(path.join(__dirname, 'browser')));
-// app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/*', function(req, res) {
     res.sendFile(path.join(__dirname, 'index.html'));

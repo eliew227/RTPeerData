@@ -2,7 +2,7 @@
 
 app.config(function($stateProvider) {
 	$stateProvider.state('main', {
-		url: '/:room',
+		url: '/game',
 		templateUrl: '/main/main.template.html',
 		controller: 'MainCtrl'
 	});
