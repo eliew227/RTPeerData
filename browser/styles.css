@@ -23,3 +23,11 @@ body {
 .insidePanel {
 	padding: 5px;
 }
+
+.glyphicon-ok-sign {
+	color: green;
+}
+
+.glyphicon-remove-sign {
+	color: gray;
+}

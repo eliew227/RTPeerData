@@ -1,18 +1,26 @@
 <div class="container">
     <div class="row">
+        <div class="alert alert-success" ng-show="lastRoundWinners.indexOf(myUsername) > -1">
+            <strong>Congratulations!</strong> You won that last round.
+        </div>
+        <div class="alert alert-info" ng-show="lastRoundWinners.length && lastRoundWinners.indexOf(myUsername) === -1">
+            <strong>Bad luck!</strong> You did not win. On the plus side, you're not average!
+        </div>
+    </div>
+    <div class="row">
         <div class="col-md-4">
-            <div class="panel panel-success">
+            <div class="panel panel-success" ng-show="totalScores.length">
                 <div class="panel-heading">
                     <h3 class="panel-title">Scorecard</h3>
                 </div>
                 <table class="table">
                     <tr>
                         <th>Name</th>
-                        <th>Score</th>
+                        <th class="text-right">Score</th>
                     </tr>
-                    <tr>
-                        <td>Bob</td>
-                        <td>500</td>
+                    <tr ng-repeat="score in totalScores | orderBy: ['-totalScore', 'username']">
+                        <td>{{score.username}}</td>
+                        <td class="text-right">{{score.totalScore}}</td>
                     </tr>
                 </table>
             </div>
@@ -21,11 +29,16 @@
                     <h3 class="panel-title">Logged in users</h3>
                 </div>
                 <table class="table">
-                    <tr ng-repeat="user in loggedInUsers">
-                        <td>{{user}}</td>
+                    <tr>
+                        <th>Name</th>
+                        <th class="text-right">Submitted for round?</th>
+                    </tr>
+                    <tr ng-repeat="user in loggedInUsers | orderBy: 'username'" ng-class="{'active': myUsername === user.username}">
+                        <td>{{user.username}}</td>
+                        <td class="text-right"><span class="glyphicon" ng-class="{'glyphicon-ok-sign': user.submitted, 'glyphicon-remove-sign': !user.submitted}"></span></td>
                     </tr>
                 </table>
-            </div>            
+            </div>
         </div>
         <div class="col-md-8">
             <div class="panel panel-primary">
@@ -33,20 +46,19 @@
                     <h3 class="panel-title">{{myUsername}}, guess the average</h3>
                 </div>
                 <div class="panel-body">
-                    In each round, players submit a number. The player who submitted the number closest to the average of all submitted numbers is the winner.
+                    In each round, players submit a number. The player who submits the number closest to the average of all submitted numbers is the winner and gets 100 points.
                 </div>
                 <div class="input-group input-group-lg insidePanel">
                     <span class="input-group-addon" id="basic-addon1">Your guess</span>
                     <input id="numberInput" type="text" class="form-control" placeholder="Enter a number" aria-describedby="sizing-addon1" ng-model="numberInput">
                 </div>
                 <div class="insidePanel">
-                    <button id="submitButton" type="button" class="btn btn-primary btn-lg center-block" ng-click="submitNumber()">Submit</button>
+                    <button id="submitButton" type="button" class="btn btn-primary btn-lg center-block" ng-click="submitNumber()" ng-disabled="shouldDisableSubmit()">Submit</button>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
 <!-- <div class="row">
     <div class="col-md-4">
         <p>

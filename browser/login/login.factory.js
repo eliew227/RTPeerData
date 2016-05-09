@@ -17,7 +17,25 @@ app.factory('LoginFactory', function() {
 	};
 
 	LoginFactory.addLoggedInUser = function (username) {
-		if (loggedInUsers.indexOf(username) === -1) loggedInUsers.push(username);
+		var newUser = {
+			username: username,
+			submitted: false
+		};
+		if (loggedInUsers.filter(function(user) {return user.username === username;}).length === 0) {
+			loggedInUsers.push(newUser);
+		}
+	};
+
+	LoginFactory.addSubmittedForLoggedInUser = function (username) {
+		for (var i = 0; i < loggedInUsers.length; i++) {
+			if (loggedInUsers[i].username === username) loggedInUsers[i].submitted = true;
+		}
+	};
+
+	LoginFactory.clearSubmissionsForAllLoggedInUser = function () {
+		for (var i = 0; i < loggedInUsers.length; i++) {
+			loggedInUsers[i].submitted = false;
+		}
 	};
 
 	LoginFactory.getUsers = function () {

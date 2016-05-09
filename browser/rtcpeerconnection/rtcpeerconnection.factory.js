@@ -97,14 +97,17 @@ app.factory('RTCFactory', function($log, $state, $rootScope, GuessFactory, Login
         });
     };
 
-    function sendUserListData (data, localUserList) {
+    function sendUserListAndScoreData (data, localUserList) {
+        console.log('score history to send', GuessFactory.getScoreHistory());
         var dataToSend = {
             userList: localUserList,
-            type: 'userList',
+            scoreHistory: GuessFactory.getScoreHistory(),
+            type: 'userListAndScoreHistory',
             hash: CryptoJS.SHA3(JSON.stringify(localUserList), { outputLength: 256 }).words.join(''),
             userToCheck: { username: data.username, password: data.password, fromSocketId: data.fromSocketId },
             from: {socketId: mySocketId, username: LoginFactory.getMyUsername()}
         };
+        console.log('data being sent', dataToSend);
         RTCFactory.sendData(dataToSend);
     }
 
@@ -141,14 +144,15 @@ app.factory('RTCFactory', function($log, $state, $rootScope, GuessFactory, Login
             }
 
             if (data.type === 'loginUser') {
-                sendUserListData(data, localUserList);
+                sendUserListAndScoreData(data, localUserList);
                 if (openDataChannels.length === 1) {
                     console.log('CREATOR CHECKING');
                     handleLoginRequest(data, localUserList);
                 }
             }
 
-            if (data.type === 'userList') {
+            if (data.type === 'userListAndScoreHistory') {
+                console.log('data received', data);
                 userListArray.push(data);
 
                 // Update list of logged in users as they come in
@@ -164,13 +168,20 @@ app.factory('RTCFactory', function($log, $state, $rootScope, GuessFactory, Login
                     // make sure to include local userList in userListArray
                     userListArray.push({
                         userList: localUserList,
-                        type: 'userList',
+                        scoreHistory: GuessFactory.getScoreHistory(),
+                        type: 'userListAndScoreHistory',
                         hash: CryptoJS.SHA3(JSON.stringify(localUserList), { outputLength: 256 }).words.join('')
                     });
 
                     // Get the most common userList and update local userList
-                    var mostCommonUserList = getMostCommonBasedOnHash(userListArray).userList;
+                    var mostCommonUserListAndScoreHistory = getMostCommonBasedOnHash(userListArray);
+                    var mostCommonUserList = mostCommonUserListAndScoreHistory.userList;
                     LoginFactory.setUsers(mostCommonUserList);
+
+                    var mostCommonScoreHistory = mostCommonUserListAndScoreHistory.scoreHistory;
+                    console.log('mostCommonScoreHistory',mostCommonScoreHistory);
+
+                    GuessFactory.setScoreHistory(mostCommonScoreHistory);
 
                     var potentialNewUser = {
                         username: data.userToCheck.username,
@@ -213,6 +224,8 @@ app.factory('RTCFactory', function($log, $state, $rootScope, GuessFactory, Login
             if (data.type === 'guess') {
                 console.log('guess received', data);
                 GuessFactory.addCurrentGuess(data);
+                LoginFactory.addSubmittedForLoggedInUser(data.from.username);
+
                 console.log('rec guess current guesses', GuessFactory.getCurrentGuesses());
                 console.log('rec guess logged in users', LoginFactory.getLoggedInUsers());
                 if (GuessFactory.getCurrentGuesses().length === LoginFactory.getLoggedInUsers().length) {
@@ -225,6 +238,7 @@ app.factory('RTCFactory', function($log, $state, $rootScope, GuessFactory, Login
                         from: {socketId: mySocketId, username: LoginFactory.getMyUsername()}
                     };
                     RTCFactory.sendData(allGuesses);
+                    LoginFactory.clearSubmissionsForAllLoggedInUser();
                 }
             }
 
@@ -237,6 +251,8 @@ app.factory('RTCFactory', function($log, $state, $rootScope, GuessFactory, Login
                     from: data.from
                 });
 
+                console.log('guessNumberArray', guessNumberArray);
+
                 console.log('guessArray', guessArray);
                 console.log('logged in users', LoginFactory.getLoggedInUsers())
                 if (guessArray.length === LoginFactory.getLoggedInUsers().length - 1) {
@@ -244,21 +260,84 @@ app.factory('RTCFactory', function($log, $state, $rootScope, GuessFactory, Login
 
                     guessArray.push(GuessFactory.getCurrentGuesses());
                     var mostCommonCurrentGuesses = getMostCommonBasedOnHash(guessArray);
+
                     console.log('***MOST COMMON GUESSES', mostCommonCurrentGuesses);
+
+                    // Add this peer's guess into guessNumberArray
+                    guessNumberArray.push({
+                        guessNumber: GuessFactory.getMyCurrentGuessNumber(),
+                        from: {socketId: mySocketId, username: LoginFactory.getMyUsername()}
+                    });
+                    console.log('guessNumberArray', guessNumberArray);
 
                     // Need to check that guess numbers match encrypted submissions
                         // If not, remove guess numbers
+                    guessNumberArray.forEach(function (guess, index) {
+                        var encryptedNumber = mostCommonCurrentGuesses.guesses.filter(function(encryptedGuess) {
+                            return guess.from.username === encryptedGuess.from.username;
+                        })[0].number;
+
+                        var guessNumberHash = CryptoJS.SHA3(guess.guessNumber + '', { outputLength: 256 }).words.join('');
+                        if (guessNumberHash !== encryptedNumber) guessNumberArray.splice(index, 1);
+                    });
 
                     // Need to calculate average and set winner with 100 points
-                    
+                    console.log('guessNumberArray', guessNumberArray);
+                    var average = guessNumberArray.reduce(function(prev, curr) {
+                        return prev + Number(curr.guessNumber);
+                    }, 0) / guessNumberArray.length;
+                    console.log('average:', average);
+
+                    var distanceFromAverage = guessNumberArray.map(function(guess) {
+                        return {
+                            guessNumber: guess.guessNumber,
+                            from: guess.from,
+                            distance: Math.abs(guess.guessNumber - average)
+                        };
+                    });
+
+                    var minDistance = distanceFromAverage.map(function(guess){
+                        return guess.distance;
+                    })
+                    .reduce(function(prev, curr) {
+                        if (curr < prev) return curr;
+                        else return prev;   
+                    });
+
+                    console.log(minDistance);
+                    var scoreboard = [];
+                    var winners = [];
+                    distanceFromAverage.forEach(function(guess) {
+                        if (guess.distance === minDistance) {
+                            scoreboard.push({
+                                username: guess.from.username,
+                                score: 100
+                            });
+                            winners.push(guess.from.username);
+                        } else {
+                            scoreboard.push({
+                                username: guess.from.username,
+                                score: 0
+                            });
+                        }
+                    });
+
+                    console.log('scoreboard', scoreboard);
+
+                    GuessFactory.addToScoreHistory(scoreboard);
 
                     // Need to set guess history and clear current guesses
+                    GuessFactory.addToGuessHistory(mostCommonCurrentGuesses);
+                    GuessFactory.setWinners(winners);
+
+                    GuessFactory.clearCurrentGuesses();
+                    GuessFactory.clearMyCurrentGuessNumber();
 
                     angular.copy([], guessArray);
                     angular.copy([], guessNumberArray);
+
                 } 
             }
-
             $rootScope.$evalAsync();
         };
     }
